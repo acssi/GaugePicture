@@ -1,134 +1,159 @@
-colorComponent = function (rf, lbl, shw) {
-    if (shw == undefined) {
-        shw = true
-    };
-    return {
-        ref: rf,
-        label: lbl,
-        component: "slider",
-        min: 0,
-        max: 255,
-        step: 1,
-        default: 0,
-        show: shw
+define([], function(){
+diveInto = function(object, string) {
+  var d = object;
+  var elements = string.split('.');
+  elements.forEach(function(el) {
+    d = d[el];
+  });
+  return d;
+}
+
+ getColor = function(o) //retrouve une couleur a partir d'un objet de layout généré par colorChooser dabs colorOptions.js
+  {
+    palette = ["#b0afae", "#7b7a78", "#545352", "#4477aa", "#7db8da", "#b6d7ea", "#46c646", "#f93f17", "#ffcf02", "#276e27", "#ffffff", "#000000"];
+    if (o.colorType == "rgb") {
+      return "rgb(" + o.rgb.red + "," + o.rgb.green + "," + o.rgb.blue + ")";
+
+    } else if ((o.colorType == "expression")) {
+      return o.colorExpression;
+    } else {
+      return palette[o.colorPicker];
     }
+  };
+
+var colorComponent = function(rf, lbl, shw) {
+  if (shw == undefined) {
+    shw = true
+  };
+  return {
+    ref: rf,
+    label: lbl,
+    component: "slider",
+    min: 0,
+    max: 255,
+    step: 1,
+    default: 125,
+    show: shw
+  }
 };
 
-rgbChooser = function (rf, lbl, shw) {
-    if (shw == undefined) {
-        shw = true
-    };
-    return {
-        type: "items",
-        label: lbl,
-        items: {
-            r: colorComponent(rf + ".red", "Red"),
-            g: colorComponent(rf + ".green", "Green"),
-            b: colorComponent(rf + ".blue", "Blue")
-        },
-        show: shw
-    }
-};
-
-colorPicker = function (rf, lbl, shw) {
-    if (shw == undefined) {
-        shw = true
-    };
-    return {
-        type: "string",
-        component: "color-picker",
-        ref: rf,
-        label: lbl,
-        defaultValue: 1,
-        show: shw
-    }
-};
-
-colorExpression = function (rf, lbl, shw) {
-    if (shw == undefined) {
-        shw = true
-    };
-    return {
-        type: "string",
-        ref: rf,
-        expression: "optional",
-        label: lbl,
-        defaultValue: "blue",
-        show: shw
-    }
-};
-
-
-
-
-colorChooser = function (rf, lbl, shw) {
-    return {
-        type: "items",
-        label: lbl,
-        items: {
-            colorType: {
-                type: "string",
-                component: "dropdown",
-                label: "Color definition",
-                ref: rf + ".colorType",
-                options: [{
-                        value: 'colorPicker',
-                        label: 'ColorPicker'
-      }, {
-                        value: 'rgb',
-                        expression: 'RGB color'
-      }, {
-                        value: 'expression',
-                        label: 'Expression'
-      }
-    ],
-                defaultValue: "colorPicker"
-
-            },
-            rgb: rgbChooser(rf + ".rgb", "RGB", function (data) {
-                //console.log(data[rf].colorType);
-                if (data[rf] == undefined || data[rf].colorType == "rgb") {
-                    //  data[rf].color="rgb("+ data[rf].rgb.red+ "," +data[rf].rgb.green +","+ data[rf].rgb.blue +")";
-                    return true;
-                }
-                return false;
-            }),
-            colorPick: colorPicker(rf + '.colorPicker', "Pick color", function (data) {
-                if (data[rf].colorType == "colorPicker") {
-                    //  data[rf].color=palette[data[rf].colorPicker];
-                    return true;
-                }
-                return false;
-            }),
-            colorExpr: colorExpression(rf + '.colorExpression', "Color", function (data) {
-                if (data[rf].colorType == "expression") {
-                    //  data[rf].color=data[rf].colorExpression;
-                    return true;
-                }
-                return false;
-            }),
-
-
-        }
-
-    }
-};
-
-
-
-
-
-
-var colorOptions = {
+var rgbChooser = function(rf, lbl, shw) {
+  if (shw == undefined) {
+    shw = true
+  };
+  return {
     type: "items",
-    label: "Fill Color",
-    show: function (data) {
-        return data.presentation == "colorFill"
-    },
+    label: lbl,
     items: {
-        chooser: colorChooser("fillColor", "Background Color", true)
+      r: colorComponent(rf + ".red", "Red"),
+      g: colorComponent(rf + ".green", "Green"),
+      b: colorComponent(rf + ".blue", "Blue")
+    },
+    show: shw
+  }
+};
 
-        /*
+var colorPicker = function(rf, lbl, shw) {
+  if (shw == undefined) {
+    shw = true
+  };
+  return {
+    type: "string",
+    component: "color-picker",
+    ref: rf,
+    label: lbl,
+    defaultValue: 1,
+    show: shw
+  }
+};
+
+var colorExpression = function(rf, lbl, shw) {
+  if (shw == undefined) {
+    shw = true
+  };
+  return {
+    type: "string",
+    ref: rf,
+    expression: "optional",
+    label: lbl,
+    defaultValue: "blue",
+    show: shw
+  }
+};
+
+
+
+
+var colorChooser = function(rf, lbl, shw) {
+  return {
+    type: "items",
+    label: lbl,
+    items: {
+      colorType: {
+        type: "string",
+        component: "dropdown",
+        label: "Color definition",
+        ref: rf + ".colorType",
+        options: [{
+          value: 'colorPicker',
+          label: 'ColorPicker'
+        }, {
+          value: 'rgb',
+          expression: 'RGB color'
+        }, {
+          value: 'expression',
+          label: 'Expression'
+        }],
+        defaultValue: "colorPicker"
+
+      },
+      rgb: rgbChooser(rf + ".rgb", "RGB", function(data) {
+        //console.log(data[rf].colorType);
+        var d = diveInto(data, rf);
+        if (d == undefined || d.colorType == "rgb") {
+          //  data[rf].color="rgb("+ data[rf].rgb.red+ "," +data[rf].rgb.green +","+ data[rf].rgb.blue +")";
+          return true;
+        }
+        return false;
+      }),
+      colorPick: colorPicker(rf + '.colorPicker', "Pick color", function(data) {
+        var d = diveInto(data, rf);
+        if (d != undefined && d.colorType == "colorPicker") {
+          //  data[rf].color=palette[data[rf].colorPicker];
+          return true;
+        }
+        return false;
+      }),
+      colorExpr: colorExpression(rf + '.colorExpression', "Color", function(data) {
+        var d = diveInto(data, rf);
+        if (d.colorType == "expression") {
+          //  data[rf].color=data[rf].colorExpression;
+          return true;
+        }
+        return false;
+      }),
+
+
+    }
+
+  }
+};
+
+
+
+
+
+
+return {
+  type: "items",
+  label: "Fill Color",
+  show: function(data) {
+    return data.gauge.props.presentation == "colorFill"
+  },
+  items: {
+    chooser: colorChooser("gauge.props.fillColor", "Background Color", true)
+
+    /*
               fillType: {
                   type: "string",
                   component: "buttongroup",
@@ -176,5 +201,5 @@ var colorOptions = {
 								defaultValue: "bottle.png",
 								show: function(data) {return data.imgSourceType=="local";}
               }*/
-    }
-};
+  }
+}; })
